@@ -1,0 +1,9 @@
+.DS_Store
+*.log
+node_modules/
+.env
+/android/build/
+/ios/build/
+/android/app/build/
+.idea/
+*.iml
