@@ -47,3 +47,19 @@ export const createAvaliacao: RequestHandler = async (req: AuthenticatedRequest,
     }
 };
 
+export const getAvaliacoesPorLugar: RequestHandler = async (req, res) => {
+    try {
+        const { idLugar } = req.params;
+
+        const avaliacoes = await AvaliacaoModel.find({ IDlugar: idLugar })
+            .populate('user', 'nome foto');
+        res.status(200).json(avaliacoes);
+        return;
+        
+    } catch(error){
+        console.error("erro ao buscar avaliações:", error);
+        res.status(500).json({ message: "Ocorreu um erro interno no servidor." });
+        return;
+    }
+    
+};
