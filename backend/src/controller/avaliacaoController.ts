@@ -11,6 +11,8 @@ interface CreateAvaliacaoBody {
     video?: string;   
 }
 
+
+
 export const createAvaliacao: RequestHandler = async (req: AuthenticatedRequest, res: Response) => {
     try {
 
@@ -61,5 +63,24 @@ export const getAvaliacoesPorLugar: RequestHandler = async (req, res) => {
         res.status(500).json({ message: "Ocorreu um erro interno no servidor." });
         return;
     }
+
     
 };
+
+export const getTodasAvaliacoes: RequestHandler = async (req, res) => {
+    try {
+
+        const avaliacoes = await AvaliacaoModel.find({ })
+            .populate('user', 'nome foto');
+        res.status(200).json(avaliacoes);
+        return;
+        
+    } catch(error){
+        console.error("erro ao buscar avaliações:", error);
+        res.status(500).json({ message: "Ocorreu um erro interno no servidor." });
+        return;
+    }
+
+    
+};
+
