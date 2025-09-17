@@ -1,4 +1,5 @@
-package com.remynz.wheelgo
+// A CORREÇÃO FINAL ESTÁ AQUI: O nome do pacote agora está correto.
+package com.remynz.wheelgoapp
 
 import android.os.Build
 import android.os.Bundle
@@ -23,7 +24,7 @@ class MainActivity : ReactActivity() {
    * Returns the name of the main component registered from JavaScript. This is used to schedule
    * rendering of the component.
    */
-  override fun getMainComponentName(): String = "main"
+  override fun getMainComponentName(): String = "WheelGO"
 
   /**
    * Returns the instance of the [ReactActivityDelegate]. We use [DefaultReactActivityDelegate]
@@ -31,13 +32,13 @@ class MainActivity : ReactActivity() {
    */
   override fun createReactActivityDelegate(): ReactActivityDelegate {
     return ReactActivityDelegateWrapper(
-          this,
-          BuildConfig.IS_NEW_ARCHITECTURE_ENABLED,
-          object : DefaultReactActivityDelegate(
-              this,
-              mainComponentName,
-              fabricEnabled
-          ){})
+        this,
+        BuildConfig.IS_NEW_ARCHITECTURE_ENABLED,
+        object : DefaultReactActivityDelegate(
+            this,
+            mainComponentName,
+            fabricEnabled
+        ){})
   }
 
   /**

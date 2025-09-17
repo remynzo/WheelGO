@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { NavigationProps } from '../navigation/AppNavigator'; // CORREÇÃO: Caminho do import
+import { NavigationProps } from '../navigation/AppNavigator'; 
 import API_BASE_URL from '../apiConfig';
 
 const TelaCadastro = () => {
