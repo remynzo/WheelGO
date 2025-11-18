@@ -4,70 +4,54 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import userRoutes from './rotas/userRotas';
 import avaliacaoRoutes from './rotas/avaliacaoRotas';
-import multer from 'multer';
+import uploadRoutes from './rotas/uploadRotas'; // Certifique-se que o nome do arquivo é uploadRotas.ts
 import path from 'path';
-import fs from 'fs';
 
 dotenv.config();
 
 const app = express();
 const PORTA = process.env.PORTA || 3001;
 
+// Middlewares
 app.use(cors());
-app.use(express.json());
 
-// 👉 Rota padrão
+// 🔴 CORREÇÃO IMPORTANTE AQUI:
+// Aumentamos o limite para 50MB para aceitar as fotos em Base64 da avaliação
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Rotas principais
+app.use('/api/users', userRoutes);
+app.use('/api/avaliacoes', avaliacaoRoutes);
+app.use('/api', uploadRoutes); // Isso cria a rota /api/uploads (se o uploadRotas estiver certo)
+
+// Servir arquivos estáticos da pasta de uploads (Para ver a foto de perfil)
+const uploadDir = path.join(__dirname, '..', 'uploads');
+app.use('/uploads', express.static(uploadDir));
+
+// Rota padrão
 app.get('/', (_req: Request, res: Response) => {
   res.json({ message: 'Servidor Funcionando' });
 });
 
-// 👉 Rotas principais
-app.use('/api/users', userRoutes);
-app.use('/api/avaliacoes', avaliacaoRoutes);
-
-// 👉 Configuração de upload com multer
-const uploadDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => {
-    const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, uniqueName + path.extname(file.originalname));
-  },
-});
-
-const upload = multer({ storage });
-
-// 👉 Rota de upload
-app.post('/api/upload', upload.single('avatar'), (req: Request, res: Response) => {
-  const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file?.filename}`;
-  res.json({ url: fileUrl });
-});
-
-// 👉 Pasta estática pública
-app.use('/uploads', express.static(uploadDir));
-
-// 👉 Inicializa o servidor
+// Conexão com o MongoDB
 const mongoURI = process.env.MONGO_URI;
 
 const startServer = async () => {
   if (!mongoURI) {
-    console.error('MONGO_URI nao ta no env doidao');
+    console.error('MONGO_URI não está definida no .env');
     process.exit(1);
   }
 
   try {
     await mongoose.connect(mongoURI);
-    console.log('conectou no mongol ✅✅✅✅');
+    console.log('✅ Conectado ao MongoDB');
 
     app.listen(PORTA, () => {
-      console.log(`server ta rodando na porta ${PORTA}`);
+      console.log(`🚀 Servidor rodando na porta ${PORTA}`);
     });
   } catch (error) {
-    console.error('deu red❌❌❌', error);
+    console.error('❌ Erro ao conectar no MongoDB', error);
     process.exit(1);
   }
 };
-
-startServer();
