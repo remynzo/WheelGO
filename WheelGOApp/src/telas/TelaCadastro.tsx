@@ -1,10 +1,14 @@
+// WheelGOApp/src/telas/TelaCadastro.tsx
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { NavigationProps } from '../navigation/AppNavigator'; // CORREÇÃO: Caminho do import
-import API_BASE_URL from '../apiConfig';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { AuthStackParamList } from '../navigation/AppNavigator'; // Importa os tipos corretos
+import API_URL from '../apiConfig'; // Importa a URL da API
 
-const TelaCadastro = () => {
+// Define as props da tela usando a lista de rotas que criamos
+type Props = NativeStackScreenProps<AuthStackParamList, 'TelaCadastro'>;
+
+const TelaCadastro = ({ navigation }: Props) => {
   const [nome, setNome] = useState('');
   const [sobrenome, setSobrenome] = useState('');
   const [user, setUser] = useState('');
@@ -12,15 +16,14 @@ const TelaCadastro = () => {
   const [telefone, setTelefone] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
-  const navigation = useNavigation<NavigationProps>();
 
   const handleCadastro = async () => {
     if (senha !== confirmarSenha) {
-      console.log('As senhas não são iguais!');
+      Alert.alert('Erro', 'As senhas não são iguais!');
       return;
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/api/users/register`, {
+      const response = await fetch(`${API_URL}/api/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -37,13 +40,16 @@ const TelaCadastro = () => {
       const data = await response.json();
 
       if (response.ok){
-        console.log('Utilizador registrado com sucesso!', data);
+        Alert.alert('Sucesso', 'Usuário registrado com sucesso!');
+        // Redireciona para o login após cadastro
+        navigation.navigate('TelaLogin');
       } else {
-        console.log('Erro no registro:', data.message);
+        Alert.alert('Erro no registro', data.message || 'Algo deu errado.');
       }
 
     } catch (error) {
       console.error('Erro na rede:', error);
+      Alert.alert('Erro', 'Falha na conexão com o servidor.');
     }
   };
 
@@ -77,14 +83,15 @@ const TelaCadastro = () => {
         />
 
 
-        {/* Campo de Sobrenome */}
-        <Text className="text-base text-gray-500 mb-2">User</Text>
+        {/* Campo de User */}
+        <Text className="text-base text-gray-500 mb-2">Usuário</Text>
         <TextInput
           className="bg-gray-100 border border-gray-300 text-gray-900 text-lg rounded-lg p-4 w-full mb-6"
-          placeholder="Seu sobrenome"
+          placeholder="Seu nome de usuário"
           placeholderTextColor="#9CA3AF"
           value={user}
           onChangeText={setUser}
+          autoCapitalize="none"
         />
 
         {/* Campo de E-mail */}
@@ -104,10 +111,9 @@ const TelaCadastro = () => {
           className="bg-gray-100 border border-gray-300 text-gray-900 text-lg rounded-lg p-4 w-full mb-6"
           placeholder="(XX) 00000 0000"
           placeholderTextColor="#9CA3AF"
-          keyboardType="numeric"
+          keyboardType="phone-pad"
           value={telefone}
           onChangeText={setTelefone}
-          autoCapitalize="none"
         />
 
         {/* Campo de Senha */}
@@ -145,7 +151,8 @@ const TelaCadastro = () => {
         {/* Botão para navegar para o login */}
         <View className="flex-row justify-center mt-8">
             <Text className="text-gray-500">Já tem uma conta? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            {/* Corrigido para navegar para 'TelaLogin' */}
+            <TouchableOpacity onPress={() => navigation.navigate('TelaLogin')}>
                 <Text className="text-blue-600 font-bold">Faça login</Text>
             </TouchableOpacity>
         </View>

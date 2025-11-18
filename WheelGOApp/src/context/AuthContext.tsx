@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, Children} from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface AuthContextData {
@@ -11,14 +11,15 @@ export interface AuthContextData {
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+    const [user, setUser] = useState<any>(null);
     const [token, setToken] = useState<string | null>(null);
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    // Começa como true (booleano)
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
-
         async function loadStorageData() {
+            console.log('[Auth] Carregando dados...');
             try {
                 const storedToken = await AsyncStorage.getItem('userToken');
                 const storedUser = await AsyncStorage.getItem('user');
@@ -27,45 +28,50 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     setToken(storedToken);
                     setUser(JSON.parse(storedUser));
                 }
-            } catch (e) {
-                console.error("Falha ao carregar os dados do cofre", e);
+            } catch (error) {
+                console.error("[Auth] Erro ao carregar:", error);
             } finally {
+                console.log('[Auth] Dados carregados. Loading virando false.');
+                // Força para false (booleano) ao terminar
                 setLoading(false);
             }
         }
 
         loadStorageData();
-    }, []); 
+    }, []);
 
-
-    const login = async ( userData: any, token: string) => {
+    const login = async (userData: any, tokenValue: string) => {
         setUser(userData);
-        setToken(token);
-
-        await AsyncStorage.setItem('userToken', token);
-        await AsyncStorage.setItem('user', JSON.stringify(userData));
-    }
+        setToken(tokenValue);
+        try {
+            await AsyncStorage.setItem('userToken', tokenValue);
+            await AsyncStorage.setItem('user', JSON.stringify(userData));
+        } catch (error) {
+            console.error("[Auth] Erro no login:", error);
+        }
+    };
 
     const logout = async () => {
         setUser(null);
         setToken(null);
-
-        await AsyncStorage.removeItem('userToken');
-        await AsyncStorage.removeItem('user');
+        try {
+            await AsyncStorage.removeItem('userToken');
+            await AsyncStorage.removeItem('user');
+        } catch (error) {
+            console.error("[Auth] Erro no logout:", error);
+        }
     };
 
     return (
-        <AuthContext.Provider value = {{ login , logout, token, user, loading }}>
+        <AuthContext.Provider value={{ user, token, loading: !!loading, login, logout }}>
             {children}
         </AuthContext.Provider>
-    ); 
+    );
 };
 
 export function useAuth() {
-
     const context = useContext(AuthContext);
     return context;
 }
-
 
 export default AuthProvider;

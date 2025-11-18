@@ -1,57 +1,76 @@
-
 import React from 'react';
-import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
-import { useAuth } from '../context/AuthContext';
 import { View, ActivityIndicator } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useAuth } from '../context/AuthContext'; 
 
-
-import TelaBoasVindas from '../telas/TelaBemVindo'; 
+import TelaBemVindo from '../telas/TelaBemVindo';
 import TelaLogin from '../telas/TelaLogin';
 import TelaCadastro from '../telas/TelaCadastro';
-import TelaMapa from '../telas/TelaMapa'
+import TelaMapa from '../telas/TelaMapa';
+import TelaDetalhesLugar from '../telas/TelaDetalhesLugar';
+import TelaNovaAvaliacao from '../telas/TelaNovaAvaliacao';
 
-
-
-export type RootStackParamList = {
-  BoasVindas: undefined;
-  Login: undefined;
-  Cadastro: undefined;
-  Mapa: undefined;
+export type AppStackParamList = {
+  TelaMapa: undefined;
+  TelaDetalhesLugar: { 
+    placeId: string;
+    nomeLugar: string;
+    endereco: string;
+    localizacao: { lat: number; lng: number };
+  };
+  TelaNovaAvaliacao: {
+    placeId: string;
+    nomeLugar: string;
+  };
 };
 
+export type AuthStackParamList = {
+  TelaBemVindo: undefined;
+  TelaLogin: undefined;
+  TelaCadastro: undefined;
+};
 
-export type NavigationProps = NativeStackNavigationProp<RootStackParamList>;
-
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const AppStack = createNativeStackNavigator<AppStackParamList>();
+const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 
 const AppNavigator = () => {
-  const { token, loading } = useAuth();
+  const { user, loading } = useAuth();
+
   if (loading) {
     return (
-      <View className='flex-1 justify-center items-center'>
-        <ActivityIndicator size="large"/>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" />
       </View>
-    )
+    );
   }
-  else
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        { token ? (
-
-          <Stack.Screen name="Mapa" component={TelaMapa} />
-        ) : (
-         
-          <>
-            <Stack.Screen name="BoasVindas" component={TelaBoasVindas} />
-            <Stack.Screen name="Login" component={TelaLogin} />
-            <Stack.Screen name="Cadastro" component={TelaCadastro} />
-          </>
-        )}
-      </Stack.Navigator>
-   </NavigationContainer>
+      {user ? (
+        // Usuário Logado -> Vai pro Mapa
+        <AppStack.Navigator screenOptions={{ headerShown: false }}> 
+          <AppStack.Screen name="TelaMapa" component={TelaMapa} />
+          <AppStack.Screen 
+            name="TelaDetalhesLugar" 
+            component={TelaDetalhesLugar} 
+            options={{ headerShown: true, title: 'Detalhes do Local' }} 
+          />
+          <AppStack.Screen 
+            name="TelaNovaAvaliacao" 
+            component={TelaNovaAvaliacao} 
+            options={{ headerShown: true, title: 'Avaliar Local' }} 
+          />
+        </AppStack.Navigator>
+      ) : (
+        // Usuário Deslogado -> Vai pra BemVindo / Login
+        <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+          <AuthStack.Screen name="TelaBemVindo" component={TelaBemVindo} />
+          <AuthStack.Screen name="TelaLogin" component={TelaLogin} />
+          <AuthStack.Screen name="TelaCadastro" component={TelaCadastro} />
+        </AuthStack.Navigator>
+      )}
+    </NavigationContainer>
   );
 };
 

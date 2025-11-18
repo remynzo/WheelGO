@@ -1,41 +1,36 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { NavigationProps } from '../navigation/AppNavigator'; // Importa o nosso tipo de navegação
-import API_BASE_URL from '../apiConfig';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { AuthStackParamList } from '../navigation/AppNavigator';
 
-const TelaBoasVindas = () => {
-  // --- CORREÇÃO 3: Usar o tipo correto com o useNavigation ---
-  const navigation = useNavigation<NavigationProps>();
+type Props = NativeStackScreenProps<AuthStackParamList, 'TelaBemVindo'>;
 
+const TelaBemVindo = ({ navigation }: Props) => {
   return (
-    <View className="flex-1 justify-center items-center bg-white w-full p-8">
-      <Image
-        source={require('../../assets/images/LogoWheelGo.png')}
-        className="w-32 h-32 mb-4"
-        resizeMode="contain"
-      />
-      <Text className="text-2xl font-bold text-gray-800 mb-12">
-        Bem-vindo(a) ao WheelGO!
+    <View className="flex-1 bg-blue-500 justify-center items-center p-6">
+      {/* Logo ou Ícone (Se tiver a imagem, descomente a linha abaixo) */}
+      {/* <Image source={require('../../assets/images/LogoWheelGo.png')} className="w-32 h-32 mb-8" /> */}
+      
+      <Text className="text-4xl font-bold text-white mb-2">WheelGO</Text>
+      <Text className="text-lg text-blue-100 text-center mb-12">
+        Acessibilidade em todo lugar, para todos.
       </Text>
-      <TouchableOpacity
-        className="bg-gray-800 w-full py-4 rounded-lg mb-4"
-        onPress={() => navigation.navigate('Cadastro')} // O erro aqui desaparece!
+
+      <TouchableOpacity 
+        className="bg-white w-full py-4 rounded-full mb-4 shadow-md"
+        onPress={() => navigation.navigate('TelaLogin')}
       >
-        <Text className="text-white text-center font-bold text-lg">
-          Registar-se
-        </Text>
+        <Text className="text-blue-600 text-center font-bold text-lg">Entrar</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        className="bg-blue-600 w-full py-4 rounded-lg"
-        onPress={() => navigation.navigate('Login')} // O erro aqui desaparece!
+
+      <TouchableOpacity 
+        className="bg-blue-700 w-full py-4 rounded-full shadow-md border border-blue-400"
+        onPress={() => navigation.navigate('TelaCadastro')}
       >
-        <Text className="text-white text-center font-bold text-lg">
-          Entrar
-        </Text>
+        <Text className="text-white text-center font-bold text-lg">Criar Conta</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-export default TelaBoasVindas;
+export default TelaBemVindo;

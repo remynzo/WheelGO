@@ -1,19 +1,19 @@
-
-
+// WheelGOApp/src/telas/TelaLogin.tsx
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { NavigationProps } from '../navigation/AppNavigator';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { AuthStackParamList } from '../navigation/AppNavigator'; // Importa os tipos corretos
 import { useAuth } from '../context/AuthContext';
-import API_BASE_URL from '../apiConfig';
+import API_URL from '../apiConfig'; // Importa com o nome padronizado
 
-const TelaLogin = () => {
+// Define as props da tela (agora ela sabe que faz parte da pilha AuthStack)
+type Props = NativeStackScreenProps<AuthStackParamList, 'TelaLogin'>;
+
+// Recebe 'navigation' diretamente via props
+const TelaLogin = ({ navigation }: Props) => {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [loading, setLoading] = useState(false); // Estado para controlar o loading
-
-  const navigation = useNavigation<NavigationProps>();
+  const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
 
@@ -22,13 +22,13 @@ const TelaLogin = () => {
     if (!email || !senha) {
       Alert.alert('Erro', 'Por favor, preencha o e-mail e a senha.');
       return;
-
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/users/login`, {
+      // Usa API_URL aqui
+      const response = await fetch(`${API_URL}/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -43,7 +43,9 @@ const TelaLogin = () => {
       setLoading(false);
 
       if (response.ok) {
+        // Login bem sucedido no Contexto
         await login(data.user, data.token);
+        // O AppNavigator vai detectar a mudança de usuário e redirecionar pro Mapa automaticamente
         
       } else {
         Alert.alert('Erro no Login', data.message || 'Não foi possível fazer o login.');
@@ -65,6 +67,7 @@ const TelaLogin = () => {
       <TextInput
         className="bg-gray-100 border border-gray-300 text-gray-900 text-lg rounded-lg p-4 w-full mb-6"
         placeholder="digite o seu e-mail"
+        placeholderTextColor="#9CA3AF"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -74,6 +77,7 @@ const TelaLogin = () => {
       <TextInput
         className="bg-gray-100 border border-gray-300 text-gray-900 text-lg rounded-lg p-4 w-full mb-4"
         placeholder="digite a sua senha"
+        placeholderTextColor="#9CA3AF"
         secureTextEntry
         value={senha}
         onChangeText={setSenha}
@@ -99,7 +103,8 @@ const TelaLogin = () => {
 
       <View className="flex-row justify-center mt-8">
         <Text className="text-gray-500">Não tem uma conta? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Cadastro')}>
+        {/* Corrigido para navegar para 'TelaCadastro' */}
+        <TouchableOpacity onPress={() => navigation.navigate('TelaCadastro')}>
           <Text className="text-blue-600 font-bold">Cadastre-se</Text>
         </TouchableOpacity>
       </View>
@@ -108,4 +113,3 @@ const TelaLogin = () => {
 };
 
 export default TelaLogin;
-
