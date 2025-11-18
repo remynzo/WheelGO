@@ -64,7 +64,8 @@ const TelaMapa = ({ navigation }: TelaMapaProps) => {
 
   const mapViewRef = useRef<MapView | null>(null);
   // refs para markers para poder abrir callout
-  const markerRefs = useRef<Record<string, Marker | null>>({});
+  const markerRefs = useRef<Record<string, typeof Marker | null>>({});
+
 
   useEffect(() => {
     (async () => {
