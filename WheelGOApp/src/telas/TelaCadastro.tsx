@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/AppNavigator'; // Importa os tipos corretos
-import API_URL from '../apiConfig'; // Importa a URL da API
+import API_BASE_URL from '../apiConfig'; // Importa a URL da API
 
 // Define as props da tela usando a lista de rotas que criamos
 type Props = NativeStackScreenProps<AuthStackParamList, 'TelaCadastro'>;
@@ -23,7 +23,7 @@ const TelaCadastro = ({ navigation }: Props) => {
       return;
     }
     try {
-      const response = await fetch(`${API_URL}/api/users/register`, {
+      const response = await fetch(`${API_BASE_URL}/api/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

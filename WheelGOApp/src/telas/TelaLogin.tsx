@@ -1,10 +1,9 @@
-// WheelGOApp/src/telas/TelaLogin.tsx
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/AppNavigator'; // Importa os tipos corretos
 import { useAuth } from '../context/AuthContext';
-import API_URL from '../apiConfig'; // Importa com o nome padronizado
+import API_BASE_URL from '../apiConfig'; // Importa com o nome padronizado
 
 // Define as props da tela (agora ela sabe que faz parte da pilha AuthStack)
 type Props = NativeStackScreenProps<AuthStackParamList, 'TelaLogin'>;
@@ -28,7 +27,7 @@ const TelaLogin = ({ navigation }: Props) => {
 
     try {
       // Usa API_URL aqui
-      const response = await fetch(`${API_URL}/api/users/login`, {
+      const response = await fetch(`${API_BASE_URL}/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -1,157 +1,115 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { NavigationProps } from '../navigation/AppNavigator'; 
-import API_BASE_URL from '../apiConfig';
+import React, { useState, useContext } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, ScrollView } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { AppStackParamList } from '../navigation/AppNavigator';
+import API_URL from '../apiConfig';
+import { useAuth } from '../context/AuthContext'; // Importa useAuth para pegar o token
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
 
-const TelaCadastro = () => {
-  const [nome, setNome] = useState('');
-  const [sobrenome, setSobrenome] = useState('');
-  const [user, setUser] = useState('');
-  const [email, setEmail] = useState('');
-  const [telefone, setTelefone] = useState('');
-  const [senha, setSenha] = useState('');
-  const [confirmarSenha, setConfirmarSenha] = useState('');
-  const navigation = useNavigation<NavigationProps>();
+type Props = NativeStackScreenProps<AppStackParamList, 'TelaNovaAvaliacao'>;
 
-  const handleCadastro = async () => {
-    if (senha !== confirmarSenha) {
-      console.log('As senhas não são iguais!');
+const TelaNovaAvaliacao = ({ route, navigation }: Props) => {
+  const { placeId, nomeLugar } = route.params;
+  const { token } = useAuth(); // Pega o token do usuário logado
+  
+  const [nota, setNota] = useState(0);
+  const [comentario, setComentario] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSalvar = async () => {
+    if (nota === 0) {
+      Alert.alert('Nota obrigatória', 'Por favor, selecione uma nota de 1 a 5.');
       return;
     }
+    
+    if (!comentario.trim()) {
+        Alert.alert('Comentário obrigatório', 'Por favor, escreva sobre a acessibilidade do local.');
+        return;
+    }
+
+    setLoading(true);
+
     try {
-      const response = await fetch(`${API_BASE_URL}/api/users/register`, {
+      const response = await fetch(`${API_URL}/api/avaliacoes/novaAvaliacao`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // Envia o token no cabeçalho
         },
         body: JSON.stringify({
-          nome: nome,
-          sobrenome: sobrenome,
-          email: email,
-          senha: senha,
-          telefone: telefone,
-          user: user,
+          IDlugar: placeId,
+          nota: nota,
+          texto: comentario,
         }),
       });
+
       const data = await response.json();
 
-      if (response.ok){
-        console.log('Utilizador registrado com sucesso!', data);
-      } else {
-        console.log('Erro no registro:', data.message);
+      if (!response.ok) {
+        throw new Error(data.message || 'Erro ao salvar avaliação');
       }
 
-    } catch (error) {
-      console.error('Erro na rede:', error);
+      Alert.alert('Sucesso!', 'Sua avaliação foi publicada.');
+      navigation.goBack(); // Volta para a tela de detalhes
+
+    } catch (error: any) {
+      console.error(error);
+      Alert.alert('Erro', 'Não foi possível enviar sua avaliação.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <ScrollView 
-      className="flex-1 bg-white"
-      contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
-      keyboardShouldPersistTaps="handled"
-    >
-      <View className="p-8">
-        <Text className="text-3xl font-bold text-gray-800 mb-8">Crie sua conta</Text>
-
-        {/* Campo de Nome */}
-        <Text className="text-base text-gray-500 mb-2">Nome</Text>
-        <TextInput
-          className="bg-gray-100 border border-gray-300 text-gray-900 text-lg rounded-lg p-4 w-full mb-6"
-          placeholder="Seu primeiro nome"
-          placeholderTextColor="#9CA3AF"
-          value={nome}
-          onChangeText={setNome}
-        />
-
-        {/* Campo de Sobrenome */}
-        <Text className="text-base text-gray-500 mb-2">Sobrenome</Text>
-        <TextInput
-          className="bg-gray-100 border border-gray-300 text-gray-900 text-lg rounded-lg p-4 w-full mb-6"
-          placeholder="Seu sobrenome"
-          placeholderTextColor="#9CA3AF"
-          value={sobrenome}
-          onChangeText={setSobrenome}
-        />
-
-
-        {/* Campo de Sobrenome */}
-        <Text className="text-base text-gray-500 mb-2">User</Text>
-        <TextInput
-          className="bg-gray-100 border border-gray-300 text-gray-900 text-lg rounded-lg p-4 w-full mb-6"
-          placeholder="Seu sobrenome"
-          placeholderTextColor="#9CA3AF"
-          value={user}
-          onChangeText={setUser}
-        />
-
-        {/* Campo de E-mail */}
-        <Text className="text-base text-gray-500 mb-2">E-mail</Text>
-        <TextInput
-          className="bg-gray-100 border border-gray-300 text-gray-900 text-lg rounded-lg p-4 w-full mb-6"
-          placeholder="seu.email@exemplo.com"
-          placeholderTextColor="#9CA3AF"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-        />
-        
-        <Text className="text-base text-gray-500 mb-2">Telefone</Text>
-        <TextInput
-          className="bg-gray-100 border border-gray-300 text-gray-900 text-lg rounded-lg p-4 w-full mb-6"
-          placeholder="(XX) 00000 0000"
-          placeholderTextColor="#9CA3AF"
-          keyboardType="numeric"
-          value={telefone}
-          onChangeText={setTelefone}
-          autoCapitalize="none"
-        />
-
-        {/* Campo de Senha */}
-        <Text className="text-base text-gray-500 mb-2">Senha</Text>
-        <TextInput
-          className="bg-gray-100 border border-gray-300 text-gray-900 text-lg rounded-lg p-4 w-full mb-6"
-          placeholder="Crie uma senha forte"
-          placeholderTextColor="#9CA3AF"
-          secureTextEntry
-          value={senha}
-          onChangeText={setSenha}
-        />
-
-        {/* Campo de Confirmar Senha */}
-        <Text className="text-base text-gray-500 mb-2">Confirmar senha</Text>
-        <TextInput
-          className="bg-gray-100 border border-gray-300 text-gray-900 text-lg rounded-lg p-4 w-full mb-8"
-          placeholder="Repita sua senha"
-          placeholderTextColor="#9CA3AF"
-          secureTextEntry
-          value={confirmarSenha}
-          onChangeText={setConfirmarSenha}
-        />
-
-        {/* Botão de Concluir */}
-        <TouchableOpacity
-          className="bg-blue-600 w-full py-4 rounded-lg"
-          onPress={handleCadastro}
-        >
-          <Text className="text-white text-center font-bold text-lg">
-            Concluir
-          </Text>
-        </TouchableOpacity>
-
-        {/* Botão para navegar para o login */}
-        <View className="flex-row justify-center mt-8">
-            <Text className="text-gray-500">Já tem uma conta? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                <Text className="text-blue-600 font-bold">Faça login</Text>
+    <ScrollView className="flex-1 bg-white p-6">
+      <Text className="text-xl text-center text-gray-500 mb-2">Avaliando</Text>
+      <Text className="text-3xl font-bold text-center text-gray-800 mb-8">{nomeLugar}</Text>
+      
+      {/* Seletor de Estrelas */}
+      <View className="items-center mb-8">
+        <Text className="text-lg font-medium mb-4 text-gray-600">Qual sua nota para a acessibilidade?</Text>
+        <View className="flex-row">
+            {[1, 2, 3, 4, 5].map((i) => (
+            <TouchableOpacity key={i} onPress={() => setNota(i)} className="p-2">
+                <FontAwesome 
+                name={i <= nota ? 'star' : 'star-o'} 
+                size={48} 
+                color="#FFD700" 
+                />
             </TouchableOpacity>
+            ))}
         </View>
       </View>
+
+      {/* Campo de Texto */}
+      <Text className="text-lg font-medium mb-2 text-gray-600">Seu comentário:</Text>
+      <TextInput
+        className="bg-gray-50 border border-gray-200 rounded-2xl p-4 text-base h-40 text-gray-700 mb-8"
+        placeholder="Descreva as rampas, banheiros, portas..."
+        placeholderTextColor="#9ca3af"
+        value={comentario}
+        onChangeText={setComentario}
+        multiline
+        textAlignVertical="top"
+      />
+
+      {/* Botão Enviar */}
+      <TouchableOpacity
+        className="bg-blue-600 py-4 rounded-2xl shadow-lg shadow-blue-500/30 flex-row justify-center items-center"
+        onPress={handleSalvar}
+        disabled={loading}
+      >
+        {loading ? (
+            <ActivityIndicator color="white" />
+        ) : (
+            <>
+                <Ionicons name="send" size={20} color="white" />
+                <Text className="text-white font-bold text-lg ml-2">Publicar Avaliação</Text>
+            </>
+        )}
+      </TouchableOpacity>
     </ScrollView>
   );
 };
 
-export default TelaCadastro;
+export default TelaNovaAvaliacao;

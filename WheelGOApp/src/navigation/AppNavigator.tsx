@@ -10,9 +10,14 @@ import TelaCadastro from '../telas/TelaCadastro';
 import TelaMapa from '../telas/TelaMapa';
 import TelaDetalhesLugar from '../telas/TelaDetalhesLugar';
 import TelaNovaAvaliacao from '../telas/TelaNovaAvaliacao';
+// Importando as novas telas (que vamos criar já já)
+import TelaUsuario from '../telas/TelaUsuario';
+import TelaMenu from '../telas/TelaMenu';
 
 export type AppStackParamList = {
   TelaMapa: undefined;
+  TelaUsuario: undefined; // Nova rota
+  TelaMenu: undefined;    // Nova rota
   TelaDetalhesLugar: { 
     placeId: string;
     nomeLugar: string;
@@ -48,22 +53,30 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       {user ? (
-        // Usuário Logado -> Vai pro Mapa
         <AppStack.Navigator screenOptions={{ headerShown: false }}> 
           <AppStack.Screen name="TelaMapa" component={TelaMapa} />
           <AppStack.Screen 
+            name="TelaUsuario" 
+            component={TelaUsuario} 
+            options={{ headerShown: true, title: 'Meu Perfil' }} 
+          />
+          <AppStack.Screen 
+            name="TelaMenu" 
+            component={TelaMenu} 
+            options={{ headerShown: true, title: 'Menu' }} 
+          />
+          <AppStack.Screen 
             name="TelaDetalhesLugar" 
             component={TelaDetalhesLugar} 
-            options={{ headerShown: true, title: 'Detalhes do Local' }} 
+            options={{ headerShown: true, title: 'Detalhes' }} 
           />
           <AppStack.Screen 
             name="TelaNovaAvaliacao" 
             component={TelaNovaAvaliacao} 
-            options={{ headerShown: true, title: 'Avaliar Local' }} 
+            options={{ headerShown: true, title: 'Avaliar' }} 
           />
         </AppStack.Navigator>
       ) : (
-        // Usuário Deslogado -> Vai pra BemVindo / Login
         <AuthStack.Navigator screenOptions={{ headerShown: false }}>
           <AuthStack.Screen name="TelaBemVindo" component={TelaBemVindo} />
           <AuthStack.Screen name="TelaLogin" component={TelaLogin} />
