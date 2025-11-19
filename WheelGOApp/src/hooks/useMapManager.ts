@@ -17,6 +17,8 @@ export interface Place {
   };
 }
 
+// Palavras-chave para garantir que apareçam
+const IMPORTANT_KEYWORDS = [""];
 
 export const useMapManager = () => {
   const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
@@ -80,8 +82,12 @@ export const useMapManager = () => {
           ];
 
           // Busca por Keyword (Federzoni)
+          const keywordPromises = IMPORTANT_KEYWORDS.map(kw => 
+              fetch(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(kw)}&location=${lat},${lng}&radius=${radius}&key=${GOOGLE_MAPS_API_KEY}`)
+              .then(res => res.json())
+          );
 
-          const allResponses = await Promise.all([...promises);
+          const allResponses = await Promise.all([...promises, ...keywordPromises]);
 
           allResponses.forEach(json => {
               if (json.status === 'OK' && json.results) {
