@@ -1,35 +1,39 @@
+// backend/src/server.ts
 import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import userRoutes from './rotas/userRotas';
 import avaliacaoRoutes from './rotas/avaliacaoRotas';
-import uploadRoutes from './rotas/uploadRotas'; // Certifique-se que o nome do arquivo é uploadRotas.ts
+import uploadRoutes from './rotas/uploadRotas'; // Garanta que o arquivo existe com esse nome
 import path from 'path';
+import fs from 'fs';
 
 dotenv.config();
 
 const app = express();
 const PORTA = process.env.PORTA || 3001;
 
-// Middlewares
 app.use(cors());
 
-// 🔴 CORREÇÃO IMPORTANTE AQUI:
-// Aumentamos o limite para 50MB para aceitar as fotos em Base64 da avaliação
+// CORREÇÃO 1: Aumentar limite para aceitar fotos em Base64 (Avaliações)
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Rotas principais
 app.use('/api/users', userRoutes);
 app.use('/api/avaliacoes', avaliacaoRoutes);
-app.use('/api', uploadRoutes); // Isso cria a rota /api/uploads (se o uploadRotas estiver certo)
 
-// Servir arquivos estáticos da pasta de uploads (Para ver a foto de perfil)
+// CORREÇÃO 2: Ajustar a rota para bater com o frontend (/api/uploads)
+// Se o uploadRotas usa '/', ao montar em '/api/uploads', o final vira '/api/uploads'
+app.use('/api/uploads', uploadRoutes);
+
+// Servir arquivos estáticos da pasta de uploads (Para exibir as fotos)
 const uploadDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 app.use('/uploads', express.static(uploadDir));
 
-// Rota padrão
+// Rota padrão de teste
 app.get('/', (_req: Request, res: Response) => {
   res.json({ message: 'Servidor Funcionando' });
 });
@@ -55,3 +59,5 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
+startServer();

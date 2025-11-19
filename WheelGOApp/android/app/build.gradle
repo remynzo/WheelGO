@@ -49,9 +49,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.remynz.wheelgoapp'
+    namespace 'com.remynz.wheelgo'
     defaultConfig {
-        applicationId 'com.remynz.wheelgoapp'
+        applicationId 'com.remynz.wheelgo'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

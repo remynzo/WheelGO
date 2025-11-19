@@ -7,6 +7,7 @@ export interface AuthContextData {
     loading: boolean;
     login: (userData: any, token: string) => Promise<void>;
     logout: () => Promise<void>;
+    updateUser: (userData: any) => Promise<void>; // NOVA FUNÇÃO
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -14,12 +15,10 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<any>(null);
     const [token, setToken] = useState<string | null>(null);
-    // Começa como true (booleano)
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         async function loadStorageData() {
-            console.log('[Auth] Carregando dados...');
             try {
                 const storedToken = await AsyncStorage.getItem('userToken');
                 const storedUser = await AsyncStorage.getItem('user');
@@ -31,12 +30,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             } catch (error) {
                 console.error("[Auth] Erro ao carregar:", error);
             } finally {
-                console.log('[Auth] Dados carregados. Loading virando false.');
-                // Força para false (booleano) ao terminar
                 setLoading(false);
             }
         }
-
         loadStorageData();
     }, []);
 
@@ -62,8 +58,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
+    // NOVA FUNÇÃO: Atualiza o usuário na memória e no armazenamento local
+    const updateUser = async (newUserData: any) => {
+        setUser(newUserData); // Atualiza o estado (memória)
+        try {
+            // Atualiza o armazenamento persistente
+            await AsyncStorage.setItem('user', JSON.stringify(newUserData));
+        } catch (error) {
+            console.error("[Auth] Erro ao atualizar usuário:", error);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, loading: !!loading, login, logout }}>
+        <AuthContext.Provider value={{ user, token, loading: !!loading, login, logout, updateUser }}>
             {children}
         </AuthContext.Provider>
     );

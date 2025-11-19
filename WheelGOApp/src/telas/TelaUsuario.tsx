@@ -1,62 +1,61 @@
-// WheelGOApp/src/telas/TelaUsuario.tsx
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import API_URL from '../apiConfig';
 
 const TelaUsuario = () => {
-  const { user, logout } = useAuth();
-  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const { user, logout, updateUser, token } = useAuth();
+  const { isDark } = useTheme();
+  
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(user?.foto || null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user?.foto) {
+        setProfileImageUrl(user.foto);
+    }
+  }, [user]);
 
   const pickImage = async (fromCamera: boolean) => {
     try {
-      // 1. Pede permissão dependendo da fonte (Câmera ou Galeria)
       const permissionResult = fromCamera
         ? await ImagePicker.requestCameraPermissionsAsync()
         : await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (permissionResult.status !== 'granted') {
-        Alert.alert('Permissão negada', 'Você precisa permitir o acesso nas configurações.');
+        Alert.alert('Permissão', 'Precisamos de acesso à câmera/galeria.');
         return;
       }
 
-      // 2. Abre a Câmera ou a Galeria
-      let result;
       const options: ImagePicker.ImagePickerOptions = {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [1, 1], // Foto quadrada para perfil
+        aspect: [1, 1],
         quality: 0.7,
       };
 
-      if (fromCamera) {
-        result = await ImagePicker.launchCameraAsync(options);
-      } else {
-        result = await ImagePicker.launchImageLibraryAsync(options);
-      }
+      const result = fromCamera
+        ? await ImagePicker.launchCameraAsync(options)
+        : await ImagePicker.launchImageLibraryAsync(options);
 
-      // 3. Se o usuário escolheu/tirou uma foto, faz o upload
       if (!result.canceled && result.assets?.length > 0) {
         const file = result.assets[0];
         await uploadImageToServer({
           uri: file.uri,
-          type: file.type || 'image/jpeg',
-          fileName: file.fileName || `foto_${Date.now()}.jpg`,
+          type: 'image/jpeg',
+          fileName: file.fileName || `avatar_${Date.now()}.jpg`,
         });
       }
     } catch (error) {
-      console.error('Erro ao abrir câmera/galeria:', error);
-      Alert.alert('Erro', 'Não foi possível abrir a câmera ou galeria.');
+      console.error('Erro no seletor:', error);
     }
   };
 
-  const uploadImageToServer = async (file: {
-    uri: string;
-    type: string;
-    fileName: string;
-  }) => {
+  const uploadImageToServer = async (file: { uri: string; type: string; fileName: string }) => {
+    setLoading(true);
     const formData = new FormData();
     
     formData.append('avatar', {
@@ -71,31 +70,42 @@ const TelaUsuario = () => {
         body: formData,
       });
 
-      const textResponse = await response.text(); 
-      try {
-          const data = JSON.parse(textResponse);
-          if (response.ok && data?.url) {
-            setProfileImageUrl(data.url);
-            Alert.alert("Sucesso", "Foto de perfil atualizada!");
-          } else {
-            console.error("Erro servidor:", data);
-            Alert.alert('Erro', 'O servidor não retornou a URL da imagem.');
-          }
-      } catch (e) {
-          console.error("Resposta inválida:", textResponse);
-          Alert.alert('Erro', 'Falha na comunicação com o servidor.');
-      }
+      const textResponse = await response.text();
+      const data = JSON.parse(textResponse);
+        
+      if (response.ok && data?.url) {
+        const novaUrl = data.url;
 
+        const updateResponse = await fetch(`${API_URL}/api/users/profile`, {
+             method: 'PUT',
+             headers: {
+                 'Content-Type': 'application/json',
+                 'Authorization': `Bearer ${token}`
+             },
+             body: JSON.stringify({ foto: novaUrl }) 
+        });
+
+        if (updateResponse.ok && user) {
+            await updateUser({ ...user, foto: novaUrl });
+            setProfileImageUrl(novaUrl);
+            Alert.alert("Sucesso", "Foto de perfil salva!");
+        } else {
+            Alert.alert("Aviso", "Foto enviada, mas erro ao salvar no perfil.");
+        }
+      } else {
+        Alert.alert('Erro', 'O servidor não devolveu a URL da imagem.');
+      }
     } catch (err) {
-      console.error('Erro no upload:', err);
-      Alert.alert('Erro de Rede', 'Verifique se o backend está rodando.');
+      Alert.alert('Erro de Rede', 'Não foi possível conectar ao servidor.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <View className="flex-1 bg-white p-6 items-center">
+    <View className="flex-1 bg-white dark:bg-gray-900 p-6 items-center">
       
-      {/* Área do Avatar */}
+      {/* Avatar */}
       <View className="mb-6 relative">
         {profileImageUrl ? (
           <Image
@@ -103,44 +113,48 @@ const TelaUsuario = () => {
             className="w-32 h-32 rounded-full border-4 border-blue-500"
           />
         ) : (
-          <View className="w-32 h-32 rounded-full bg-blue-100 items-center justify-center border-4 border-white shadow-sm">
-            <Ionicons name="person" size={80} color="#2563eb" />
+          <View className="w-32 h-32 rounded-full bg-blue-100 dark:bg-gray-700 items-center justify-center border-4 border-white shadow-sm">
+            <Ionicons name="person" size={80} color={isDark ? "#93c5fd" : "#2563eb"} />
           </View>
         )}
-        {/* Ícone de câmera flutuante para indicar edição */}
+        
+        {loading && (
+            <View className="absolute inset-0 bg-black/30 rounded-full items-center justify-center">
+                <ActivityIndicator color="white" />
+            </View>
+        )}
+
         <View className="absolute bottom-0 right-0 bg-blue-600 p-2 rounded-full border-2 border-white">
             <Ionicons name="camera" size={20} color="white" />
         </View>
       </View>
 
-      {/* Botões de Ação (Câmera e Galeria) */}
+      {/* Botões */}
       <View className="flex-row space-x-4 mb-8 w-full justify-center px-4 gap-4">
         <TouchableOpacity 
             onPress={() => pickImage(true)}
             className="flex-1 bg-blue-600 py-3 rounded-xl flex-row justify-center items-center shadow-md"
         >
             <Ionicons name="camera-outline" size={20} color="white" />
-            <Text className="text-white font-bold ml-2">Tirar Foto</Text>
+            <Text className="text-white font-bold ml-2">Câmera</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
             onPress={() => pickImage(false)}
-            className="flex-1 bg-white border border-gray-200 py-3 rounded-xl flex-row justify-center items-center shadow-sm"
+            className="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 py-3 rounded-xl flex-row justify-center items-center shadow-sm"
         >
-            <Ionicons name="images-outline" size={20} color="#374151" />
-            <Text className="text-gray-700 font-bold ml-2">Galeria</Text>
+            <Ionicons name="images-outline" size={20} color={isDark ? "#93c5fd" : "#374151"} />
+            <Text className="font-bold ml-2 text-gray-700 dark:text-gray-200">Galeria</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Informações do Usuário */}
-      <Text className="text-2xl font-bold text-gray-800 mb-1">
+      <Text className="text-2xl font-bold text-gray-800 dark:text-white mb-1">
         {user?.nome} {user?.sobrenome}
       </Text>
-      <Text className="text-gray-500 text-lg mb-10">{user?.email}</Text>
+      <Text className="text-gray-500 dark:text-gray-400 text-lg mb-10">{user?.email}</Text>
 
-      {/* Botão de Logout */}
       <TouchableOpacity
-        className="bg-red-50 w-full py-4 rounded-xl flex-row justify-center items-center border border-red-100 mt-auto mb-4"
+        className="bg-red-50 dark:bg-red-900/30 w-full py-4 rounded-xl flex-row justify-center items-center border border-red-100 dark:border-red-800 mt-auto mb-4"
         onPress={logout}
       >
         <Ionicons name="log-out-outline" size={24} color="#ef4444" />

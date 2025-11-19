@@ -1,53 +1,68 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../navigation/AppNavigator'; // Importa os tipos corretos
+import { AuthStackParamList } from '../navigation/AppNavigator';
 import { useAuth } from '../context/AuthContext';
-import API_BASE_URL from '../apiConfig'; // Importa com o nome padronizado
+import API_URL from '../apiConfig';
+import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 
-// Define as props da tela (agora ela sabe que faz parte da pilha AuthStack)
 type Props = NativeStackScreenProps<AuthStackParamList, 'TelaLogin'>;
 
-// Recebe 'navigation' diretamente via props
+// --- CORREÇÃO: O Componente Auxiliar agora está FORA da função principal ---
+const InputField = ({ icon, placeholder, value, onChangeText, isPassword = false, keyboardType = 'default', showPassword, togglePassword }: any) => (
+    <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 mb-4">
+        <Ionicons name={icon} size={20} color="#9CA3AF" style={{ marginRight: 10 }} />
+        <TextInput
+            className="flex-1 text-gray-700 text-base"
+            placeholder={placeholder}
+            placeholderTextColor="#9CA3AF"
+            value={value}
+            onChangeText={onChangeText}
+            secureTextEntry={isPassword && !showPassword}
+            keyboardType={keyboardType}
+            autoCapitalize="none"
+        />
+        {isPassword && (
+            <TouchableOpacity onPress={togglePassword}>
+                <Ionicons name={showPassword ? "eye-off" : "eye"} size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+        )}
+    </View>
+);
+// -----------------------------------------------------------------------
+
 const TelaLogin = ({ navigation }: Props) => {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { login } = useAuth();
 
   const handleLogin = async () => {
-    
     if (!email || !senha) {
-      Alert.alert('Erro', 'Por favor, preencha o e-mail e a senha.');
+      Alert.alert('Campos vazios', 'Por favor, preencha o e-mail e a senha.');
       return;
     }
 
     setLoading(true);
 
     try {
-      // Usa API_URL aqui
-      const response = await fetch(`${API_BASE_URL}/api/users/login`, {
+      const response = await fetch(`${API_URL}/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          email,
-          senha,
-        }),
+        body: JSON.stringify({ email, senha }),
       });
 
       const data = await response.json();
       setLoading(false);
 
       if (response.ok) {
-        // Login bem sucedido no Contexto
         await login(data.user, data.token);
-        // O AppNavigator vai detectar a mudança de usuário e redirecionar pro Mapa automaticamente
-        
       } else {
-        Alert.alert('Erro no Login', data.message || 'Não foi possível fazer o login.');
+        Alert.alert('Falha no Login', data.message || 'E-mail ou senha incorretos.');
       }
 
     } catch (error) {
@@ -57,57 +72,83 @@ const TelaLogin = ({ navigation }: Props) => {
     }
   };
 
+  const handleGoogleLogin = () => {
+      Alert.alert("Google Login", "Funcionalidade em breve!");
+  };
+
   return (
-    <View className="flex-1 justify-center bg-white p-8">
-      <Text className="text-3xl font-bold text-gray-800 mb-8">
-        Boas-vindas de volta!
-      </Text>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-white">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+        
+        <View className="px-8 pt-12 pb-8">
+            <TouchableOpacity onPress={() => navigation.goBack()} className="bg-gray-100 self-start p-2 rounded-full mb-8">
+                <Ionicons name="arrow-back" size={24} color="#4B5563" />
+            </TouchableOpacity>
 
-      <TextInput
-        className="bg-gray-100 border border-gray-300 text-gray-900 text-lg rounded-lg p-4 w-full mb-6"
-        placeholder="digite o seu e-mail"
-        placeholderTextColor="#9CA3AF"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
+            <Text className="text-4xl font-extrabold text-gray-900 mb-2">Bem-vindo!</Text>
+            <Text className="text-lg text-gray-500">Faça login para continuar sua jornada.</Text>
+        </View>
 
-      <TextInput
-        className="bg-gray-100 border border-gray-300 text-gray-900 text-lg rounded-lg p-4 w-full mb-4"
-        placeholder="digite a sua senha"
-        placeholderTextColor="#9CA3AF"
-        secureTextEntry
-        value={senha}
-        onChangeText={setSenha}
-      />
-      
-      <TouchableOpacity className="self-start mb-8">
-        <Text className="text-blue-600 font-semibold">Esqueceu a sua senha?</Text>
-      </TouchableOpacity>
-      
-      <TouchableOpacity
-        className="bg-blue-600 w-full py-4 rounded-lg flex-row justify-center items-center"
-        onPress={handleLogin}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text className="text-white text-center font-bold text-lg">
-            Entrar
-          </Text>
-        )}
-      </TouchableOpacity>
+        <View className="px-8 pb-8">
+            
+            <InputField 
+                icon="mail-outline" 
+                placeholder="Seu e-mail" 
+                value={email} 
+                onChangeText={setEmail} 
+                keyboardType="email-address" 
+            />
+            
+            <InputField 
+                icon="lock-closed-outline" 
+                placeholder="Sua senha" 
+                value={senha} 
+                onChangeText={setSenha} 
+                isPassword={true}
+                showPassword={showPassword}
+                togglePassword={() => setShowPassword(!showPassword)}
+            />
+            
+            <TouchableOpacity className="self-end mb-8">
+                <Text className="text-blue-600 font-semibold">Esqueceu a senha?</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+                className="bg-blue-600 w-full py-4 rounded-2xl shadow-lg shadow-blue-500/30 flex-row justify-center items-center mb-8"
+                onPress={handleLogin}
+                disabled={loading}
+            >
+                {loading ? (
+                <ActivityIndicator color="#fff" />
+                ) : (
+                <Text className="text-white text-center font-bold text-xl">Entrar</Text>
+                )}
+            </TouchableOpacity>
 
-      <View className="flex-row justify-center mt-8">
-        <Text className="text-gray-500">Não tem uma conta? </Text>
-        {/* Corrigido para navegar para 'TelaCadastro' */}
-        <TouchableOpacity onPress={() => navigation.navigate('TelaCadastro')}>
-          <Text className="text-blue-600 font-bold">Cadastre-se</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+             <View className="flex-row items-center mb-6">
+                <View className="flex-1 h-[1px] bg-gray-200" />
+                <Text className="mx-4 text-gray-400 font-medium">ou continue com</Text>
+                <View className="flex-1 h-[1px] bg-gray-200" />
+            </View>
+
+            <TouchableOpacity 
+                onPress={handleGoogleLogin}
+                className="flex-row items-center justify-center bg-white border border-gray-200 py-4 rounded-2xl mb-8"
+            >
+                <FontAwesome5 name="google" size={20} color="#DB4437" />
+                <Text className="ml-3 text-gray-700 font-bold text-base">Google</Text>
+            </TouchableOpacity>
+
+            <View className="flex-row justify-center mt-auto mb-4">
+                <Text className="text-gray-500 text-base">Não tem uma conta? </Text>
+                <TouchableOpacity onPress={() => navigation.navigate('TelaCadastro')}>
+                    <Text className="text-blue-600 font-bold text-base">Cadastre-se</Text>
+                </TouchableOpacity>
+            </View>
+
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 

@@ -84,3 +84,86 @@ export const getTodasAvaliacoes: RequestHandler = async (req, res) => {
     
 };
 
+export const getMinhasAvaliacoes: RequestHandler = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const user = req.user;
+
+        if (!user) {
+             res.status(401).json({ message: 'Usuário não identificado.' });
+             return;
+        }
+
+        // Busca onde o campo 'user' é igual ao ID do usuário logado
+        const avaliacoes = await AvaliacaoModel.find({ user: user._id }).sort({ createdAt: -1 }); // Mais recentes primeiro
+        
+        res.status(200).json(avaliacoes);
+
+    } catch(error){
+        console.error("Erro ao buscar minhas avaliações:", error);
+        res.status(500).json({ message: "Erro interno no servidor." });
+    }
+};
+
+// ... imports existentes ...
+
+// ATUALIZAR (EDITAR) AVALIAÇÃO
+export const updateAvaliacao: RequestHandler = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const { id } = req.params;
+        const { nota, texto, fotos } = req.body;
+        const user = req.user;
+
+        const avaliacao = await AvaliacaoModel.findById(id);
+
+        if (!avaliacao) {
+             res.status(404).json({ message: 'Avaliação não encontrada.' });
+             return;
+        }
+
+        // VERIFICAÇÃO DE SEGURANÇA: Só o dono pode editar
+        if (avaliacao.user.toString() !== user?._id.toString()) {
+             res.status(401).json({ message: 'Não autorizado.' });
+             return;
+        }
+
+        // Atualiza os campos
+        avaliacao.nota = nota || avaliacao.nota;
+        avaliacao.texto = texto || avaliacao.texto;
+        if (fotos) avaliacao.fotos = fotos; // Se vier novas fotos, substitui
+
+        const atualizada = await avaliacao.save();
+        res.json(atualizada);
+
+    } catch (error) {
+        console.error("Erro ao atualizar:", error);
+        res.status(500).json({ message: "Erro interno." });
+    }
+};
+
+// DELETAR AVALIAÇÃO
+export const deleteAvaliacao: RequestHandler = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const { id } = req.params;
+        const user = req.user;
+
+        const avaliacao = await AvaliacaoModel.findById(id);
+
+        if (!avaliacao) {
+             res.status(404).json({ message: 'Avaliação não encontrada.' });
+             return;
+        }
+
+        // VERIFICAÇÃO DE SEGURANÇA: Só o dono pode deletar
+        if (avaliacao.user.toString() !== user?._id.toString()) {
+             res.status(401).json({ message: 'Não autorizado.' });
+             return;
+        }
+
+        await avaliacao.deleteOne();
+        res.json({ message: 'Avaliação removida com sucesso.' });
+
+    } catch (error) {
+        console.error("Erro ao deletar:", error);
+        res.status(500).json({ message: "Erro interno." });
+    }
+};

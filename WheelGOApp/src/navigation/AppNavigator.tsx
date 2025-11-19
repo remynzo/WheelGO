@@ -3,21 +3,25 @@ import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuth } from '../context/AuthContext'; 
-
+import TelaMinhasAvaliacoes from '../telas/TelaMinhasAvaliacoes';
 import TelaBemVindo from '../telas/TelaBemVindo';
 import TelaLogin from '../telas/TelaLogin';
 import TelaCadastro from '../telas/TelaCadastro';
 import TelaMapa from '../telas/TelaMapa';
 import TelaDetalhesLugar from '../telas/TelaDetalhesLugar';
 import TelaNovaAvaliacao from '../telas/TelaNovaAvaliacao';
-// Importando as novas telas (que vamos criar já já)
 import TelaUsuario from '../telas/TelaUsuario';
 import TelaMenu from '../telas/TelaMenu';
+import TelaRanking from '../telas/TelaRanking';
+import TelaConfiguracoes from '../telas/TelaConfiguracoes';
+import { useTheme } from '../context/ThemeContext'; // DARK MODE aqui
 
 export type AppStackParamList = {
   TelaMapa: undefined;
-  TelaUsuario: undefined; // Nova rota
-  TelaMenu: undefined;    // Nova rota
+  TelaUsuario: undefined;
+  TelaMenu: undefined;
+  TelaMinhasAvaliacoes: undefined;
+  TelaConfiguracoes: undefined;
   TelaDetalhesLugar: { 
     placeId: string;
     nomeLugar: string;
@@ -27,6 +31,17 @@ export type AppStackParamList = {
   TelaNovaAvaliacao: {
     placeId: string;
     nomeLugar: string;
+    avaliacaoExistente?: {
+        _id: string;
+        nota: number;
+        texto: string;
+        fotos: string[];
+    };
+  };
+  TelaRanking: {
+    categoriaId: string;
+    categoriaNome: string;
+    userLocation: { lat: number; lng: number };
   };
 };
 
@@ -41,6 +56,7 @@ const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 
 const AppNavigator = () => {
   const { user, loading } = useAuth();
+  const { isDark } = useTheme(); // 👈 Correção AQUI!
 
   if (loading) {
     return (
@@ -50,31 +66,33 @@ const AppNavigator = () => {
     );
   }
 
+  const screenHeaderStyle = {
+    headerStyle: {
+      backgroundColor: isDark ? '#1f2937' : '#ffffff',
+    },
+    headerTitleStyle: {
+      color: isDark ? '#ffffff' : '#000000',
+    },
+    headerTintColor: isDark ? '#ffffff' : '#000000',
+  };
+
   return (
     <NavigationContainer>
       {user ? (
-        <AppStack.Navigator screenOptions={{ headerShown: false }}> 
-          <AppStack.Screen name="TelaMapa" component={TelaMapa} />
-          <AppStack.Screen 
-            name="TelaUsuario" 
-            component={TelaUsuario} 
-            options={{ headerShown: true, title: 'Meu Perfil' }} 
-          />
-          <AppStack.Screen 
-            name="TelaMenu" 
-            component={TelaMenu} 
-            options={{ headerShown: true, title: 'Menu' }} 
-          />
-          <AppStack.Screen 
-            name="TelaDetalhesLugar" 
-            component={TelaDetalhesLugar} 
-            options={{ headerShown: true, title: 'Detalhes' }} 
-          />
-          <AppStack.Screen 
-            name="TelaNovaAvaliacao" 
-            component={TelaNovaAvaliacao} 
-            options={{ headerShown: true, title: 'Avaliar' }} 
-          />
+        <AppStack.Navigator
+          screenOptions={{
+            headerShown: true,
+            ...screenHeaderStyle,
+          }}
+        >
+          <AppStack.Screen name="TelaMapa" component={TelaMapa} options={{ headerShown: false }}/>
+          <AppStack.Screen name="TelaUsuario" component={TelaUsuario} options={{ title: 'Meu Perfil' }} />
+          <AppStack.Screen name="TelaMenu" component={TelaMenu} options={{ title: 'Menu' }} />
+          <AppStack.Screen name="TelaDetalhesLugar" component={TelaDetalhesLugar} options={{ headerShown: false }} />
+          <AppStack.Screen name="TelaNovaAvaliacao" component={TelaNovaAvaliacao} options={{ title: 'Avaliar' }} />
+          <AppStack.Screen name="TelaRanking" component={TelaRanking} options={{ headerShown: false }} />
+          <AppStack.Screen name="TelaMinhasAvaliacoes" component={TelaMinhasAvaliacoes} options={{ headerShown: false, title: 'Minhas Avaliações' }} />
+          <AppStack.Screen name="TelaConfiguracoes" component={TelaConfiguracoes} options={{ headerShown: false }} />
         </AppStack.Navigator>
       ) : (
         <AuthStack.Navigator screenOptions={{ headerShown: false }}>
