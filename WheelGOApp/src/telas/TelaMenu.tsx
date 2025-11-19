@@ -19,21 +19,15 @@ const TelaMenu = () => {
     },
     { 
       id: 2, 
-      nome: 'Favoritos', 
-      icon: 'heart-outline', 
-      acao: () => Alert.alert('Em breve', 'Lista de favoritos virá na próxima versão!')
-    },
-    { 
-      id: 3, 
       nome: 'Configurações', 
       icon: 'settings-outline', 
       acao: () => navigation.navigate('TelaConfiguracoes')
     },
     { 
-      id: 4, 
+      id: 3, 
       nome: 'Ajuda e Suporte', 
       icon: 'help-buoy-outline', 
-      acao: () => Alert.alert('Suporte', 'Entre em contato: suporte@wheelgo.com')
+      acao: () => Alert.alert('Suporte', 'Entre em contato: projetoEEFGI@gmail.com')
     },
   ];
 

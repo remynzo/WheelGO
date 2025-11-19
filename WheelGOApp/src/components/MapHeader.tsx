@@ -37,7 +37,7 @@ const MapHeader = ({
   return (
     // CORREÇÃO 1: Z-Index muito alto (2000) para ficar acima dos Marcadores (que são 1000)
     <View 
-      className="absolute top-14 left-5 right-5" 
+      className="absolute top-6 left-5 right-5" 
       style={{ zIndex: 2000, elevation: 20 }} // Elevation alta para Android
       pointerEvents="box-none" // Permite clicar no mapa nas áreas vazias em volta do header
     >
