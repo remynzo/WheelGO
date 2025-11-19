@@ -11,7 +11,6 @@ import CustomMarker from '../components/CustomMarker'; // <--- Importa o Marcado
 import hidePOI from '../mapStyles/hidePOI';
 import { useTheme } from '../context/ThemeContext';
 
-// Estilo Dark (Pode mover pra um arquivo separado depois se quiser limpar mais)
 const mapStyleDark = [
   { "elementType": "geometry", "stylers": [{ "color": "#242f3e" }] },
   { "elementType": "labels.text.stroke", "stylers": [{ "color": "#242f3e" }] },

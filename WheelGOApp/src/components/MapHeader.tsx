@@ -35,11 +35,11 @@ const MapHeader = ({
   const { isDark } = useTheme();
 
   return (
-    // CORREÇÃO 1: Z-Index muito alto (2000) para ficar acima dos Marcadores (que são 1000)
+   
     <View 
       className="absolute top-6 left-5 right-5" 
-      style={{ zIndex: 2000, elevation: 20 }} // Elevation alta para Android
-      pointerEvents="box-none" // Permite clicar no mapa nas áreas vazias em volta do header
+      style={{ zIndex: 2000, elevation: 20 }} 
+      pointerEvents="box-none" 
     >
       
       {/* Barra de Busca */}
@@ -78,14 +78,14 @@ const MapHeader = ({
       {showSuggestions && suggestions && suggestions.length > 0 && onSelectSuggestion && (
         <View 
             className="absolute top-16 left-0 right-0 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 max-h-60 overflow-hidden mt-2"
-            // CORREÇÃO 2: Importante! Isso diz "Eu capturo o toque aqui, não deixe passar pro mapa"
+            
             onStartShouldSetResponder={() => true}
-            style={{ zIndex: 2001, elevation: 21 }} // Mais alto que a barra
+            style={{ zIndex: 2001, elevation: 21 }} 
         >
             <FlatList
                 data={suggestions}
                 keyExtractor={(item) => item.place_id}
-                keyboardShouldPersistTaps="handled" // Permite clicar sem fechar o teclado primeiro
+                keyboardShouldPersistTaps="handled" 
                 renderItem={({ item }) => (
                     <TouchableOpacity 
                         className="p-4 border-b border-gray-100 dark:border-gray-700 flex-row items-center active:bg-gray-50 dark:active:bg-gray-700"

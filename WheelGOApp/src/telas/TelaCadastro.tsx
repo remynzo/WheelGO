@@ -4,11 +4,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/AppNavigator';
 import API_URL from '../apiConfig';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons'; 
-
 type Props = NativeStackScreenProps<AuthStackParamList, 'TelaCadastro'>;
 
-// --- CORREÇÃO: O Componente Auxiliar agora está FORA da função principal ---
-// Isso impede que ele seja recriado a cada digitação
 const InputField = ({ icon, placeholder, value, onChangeText, isPassword = false, keyboardType = 'default', togglePassword, showPassword }: any) => (
     <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 mb-4">
         <Ionicons name={icon} size={20} color="#9CA3AF" style={{ marginRight: 10 }} />
@@ -29,7 +26,7 @@ const InputField = ({ icon, placeholder, value, onChangeText, isPassword = false
         )}
     </View>
 );
-// -----------------------------------------------------------------------
+
 
 const TelaCadastro = ({ navigation }: Props) => {
   const [nome, setNome] = useState('');
@@ -41,7 +38,7 @@ const TelaCadastro = ({ navigation }: Props) => {
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [loading, setLoading] = useState(false);
   
-  // Estados individuais para mostrar senha (opcional, ou usa um geral)
+
   const [showPassword, setShowPassword] = useState(false);
 
   const handleCadastro = async () => {

@@ -22,20 +22,19 @@ const TelaConfiguracoes = ({ navigation }: Props) => {
     ]);
   };
 
-  // Componente Auxiliar Atualizado com classes DARK
   const ConfigItem = ({ icon, label, onPress, hasSwitch, switchValue, onSwitchChange, isDestructive = false }: any) => (
     <TouchableOpacity 
         onPress={hasSwitch ? () => onSwitchChange(!switchValue) : onPress}
         activeOpacity={hasSwitch ? 1 : 0.7}
-        // ADICIONADO: dark:bg-gray-800 dark:border-gray-700
+
         className="flex-row items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-2xl mb-3 border border-gray-100 dark:border-gray-700 shadow-sm"
     >
         <View className="flex-row items-center">
-            {/* ADICIONADO: dark:bg-gray-700 */}
+
             <View className={`p-2 rounded-full mr-3 ${isDestructive ? 'bg-red-100 dark:bg-red-900/30' : 'bg-blue-50 dark:bg-gray-700'}`}>
                 <Ionicons name={icon} size={20} color={isDestructive ? '#EF4444' : '#2563eb'} />
             </View>
-            {/* ADICIONADO: dark:text-gray-200 */}
+
             <Text className={`text-base font-medium ${isDestructive ? 'text-red-500' : 'text-gray-700 dark:text-gray-200'}`}>
                 {label}
             </Text>
@@ -55,14 +54,14 @@ const TelaConfiguracoes = ({ navigation }: Props) => {
   );
 
   const SectionTitle = ({ title }: { title: string }) => (
-      // ADICIONADO: dark:text-gray-500
+
       <Text className="text-gray-400 dark:text-gray-500 text-xs font-bold uppercase tracking-wider mb-3 ml-1 mt-4">
           {title}
       </Text>
   );
 
   return (
-    // ADICIONADO: dark:bg-gray-900 no container principal
+
     <View className="flex-1 bg-gray-50 dark:bg-gray-900">
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
@@ -77,8 +76,7 @@ const TelaConfiguracoes = ({ navigation }: Props) => {
       <ScrollView contentContainerStyle={{ padding: 20 }} showsVerticalScrollIndicator={false}>
         
         <SectionTitle title="Preferências" />
-        
-        {/* ITEM DE MODO ESCURO CONECTADO */}
+
         <ConfigItem 
             icon="moon-outline" 
             label="Modo Escuro" 

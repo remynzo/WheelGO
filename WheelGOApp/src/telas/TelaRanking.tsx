@@ -6,7 +6,7 @@ import { AppStackParamList } from '../navigation/AppNavigator';
 import { GOOGLE_MAPS_API_KEY } from '@env';
 import API_URL from '../apiConfig';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
-import { useTheme } from '../context/ThemeContext'; // Importar Theme
+import { useTheme } from '../context/ThemeContext'; 
 
 type Props = NativeStackScreenProps<AppStackParamList, 'TelaRanking'>;
 

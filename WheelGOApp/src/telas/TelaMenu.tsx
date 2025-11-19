@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../navigation/AppNavigator';
-import { useTheme } from '../context/ThemeContext'; // Importa contexto de tema
+import { useTheme } from '../context/ThemeContext'; 
 
 const TelaMenu = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();

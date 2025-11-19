@@ -6,7 +6,7 @@ import { AppStackParamList } from '../navigation/AppNavigator';
 import API_URL from '../apiConfig';
 import { useIsFocused } from '@react-navigation/native';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
-import { useTheme } from '../context/ThemeContext'; // <--- Importa o hook de tema
+import { useTheme } from '../context/ThemeContext'; 
 
 type Props = NativeStackScreenProps<AppStackParamList, 'TelaDetalhesLugar'>;
 

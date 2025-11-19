@@ -17,8 +17,6 @@ export interface Place {
   };
 }
 
-// Palavras-chave para garantir que apareçam
-const IMPORTANT_KEYWORDS = ["Federzoni", "Supermercado", "Shopping", "McDonald's", "Bella Sushi"];
 
 export const useMapManager = () => {
   const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
@@ -82,12 +80,8 @@ export const useMapManager = () => {
           ];
 
           // Busca por Keyword (Federzoni)
-          const keywordPromises = IMPORTANT_KEYWORDS.map(kw => 
-              fetch(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(kw)}&location=${lat},${lng}&radius=${radius}&key=${GOOGLE_MAPS_API_KEY}`)
-              .then(res => res.json())
-          );
 
-          const allResponses = await Promise.all([...promises, ...keywordPromises]);
+          const allResponses = await Promise.all([...promises);
 
           allResponses.forEach(json => {
               if (json.status === 'OK' && json.results) {

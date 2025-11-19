@@ -8,7 +8,7 @@ import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'TelaLogin'>;
 
-// --- CORREÇÃO: O Componente Auxiliar agora está FORA da função principal ---
+
 const InputField = ({ icon, placeholder, value, onChangeText, isPassword = false, keyboardType = 'default', showPassword, togglePassword }: any) => (
     <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 mb-4">
         <Ionicons name={icon} size={20} color="#9CA3AF" style={{ marginRight: 10 }} />
@@ -29,7 +29,7 @@ const InputField = ({ icon, placeholder, value, onChangeText, isPassword = false
         )}
     </View>
 );
-// -----------------------------------------------------------------------
+
 
 const TelaLogin = ({ navigation }: Props) => {
   const [email, setEmail] = useState('');

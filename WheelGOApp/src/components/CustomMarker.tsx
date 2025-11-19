@@ -13,13 +13,7 @@ interface Props {
   onPress: (place: any) => void;
 }
 
-/**
- * Responsividade do marker:
- * - iconSize: proporcional à largura da tela, mas com limites (min/max)
- * - shadowPad: espaço extra para sombra/borda
- * - anchorY: calculado para posicionar corretamente o círculo sem corte
- * - tracksTimeout: tempo adaptivo pra tracksViewChanges
- */
+
 const calcMarkerProps = () => {
   const base = Math.max(30, Math.min(48, Math.round(SCREEN_WIDTH * 0.08)));
   const density = PixelRatio.get();

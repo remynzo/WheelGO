@@ -22,7 +22,7 @@ interface MinhaAvaliacao {
 }
 
 const TelaMinhasAvaliacoes = () => {
-  const navigation = useNavigation<any>(); // Tipagem any para facilitar a navegação complexa
+  const navigation = useNavigation<any>(); 
   const { token } = useAuth();
   const [avaliacoes, setAvaliacoes] = useState<MinhaAvaliacao[]>([]);
   const [loading, setLoading] = useState(true);
