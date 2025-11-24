@@ -1,13 +1,12 @@
-// WheelGOApp/src/telas/TelaMapa.tsx
 import React from 'react';
-import { View, Text, ActivityIndicator, TouchableOpacity, StatusBar, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, TouchableOpacity, StatusBar } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../navigation/AppNavigator';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useMapManager, Place } from '../hooks/useMapManager'; 
 import MapHeader from '../components/MapHeader';
-import CustomMarker from '../components/CustomMarker'; // <--- Importa o Marcador Isolado
+import CustomMarker from '../components/CustomMarker'; // Importando o marcador separado
 import hidePOI from '../mapStyles/hidePOI';
 import { useTheme } from '../context/ThemeContext';
 
@@ -59,7 +58,6 @@ const TelaMapa = ({ navigation }: TelaMapaProps) => {
   const getIconForPlace = (place: Place) => {
     const name = (place.name ?? '').toLowerCase();
     const vicinity = (place.vicinity ?? '').toLowerCase();
-
     const mercadoRegex = /\b(supermercad|supermercado|mercado|merceari|grocery|supermarket|atacadista|assai|carrefour|federzoni)\b/i;
     const padariaRegex = /\b(padaria|pão|panificadora|bakery)\b/i;
     const farmaciaRegex = /\b(farmácia|farmacia|drogaria|pharmacy)\b/i;
@@ -74,15 +72,15 @@ const TelaMapa = ({ navigation }: TelaMapaProps) => {
 
   if (map.loading) {
     return (
-      <View style={[styles.centered, isDark && { backgroundColor: '#111827' }]}>
+      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-900">
         <ActivityIndicator size="large" color={isDark ? "#fff" : "#2563eb"} />
-        <Text style={{ marginTop: 12, color: isDark ? '#d1d5db' : '#374151' }}>Carregando mapa...</Text>
+        <Text className="mt-4 text-gray-500 dark:text-gray-400 font-medium">Carregando mapa...</Text>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, isDark && { backgroundColor: '#111827' }]}>
+    <View className="flex-1 bg-white dark:bg-gray-900">
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
       <MapHeader 
@@ -109,6 +107,8 @@ const TelaMapa = ({ navigation }: TelaMapaProps) => {
             latitudeDelta: 0.015,
             longitudeDelta: 0.0121,
         } : undefined}
+        // Conectando o evento de Viewport para carregar só o que está na tela
+        onRegionChangeComplete={map.onRegionChangeComplete}
       >
         {map.places.map((place, idx) => {
           const icon = getIconForPlace(place);
@@ -126,15 +126,22 @@ const TelaMapa = ({ navigation }: TelaMapaProps) => {
         })}
       </MapView>
 
+      {/* Feedback Visual (Com NativeWind) */}
       {map.loadingPlaces && (
-        <View style={[styles.searchingBox, isDark && { backgroundColor: '#1f2937' }]}>
+        <View className="absolute top-48 self-center bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-md flex-row items-center z-40">
             <ActivityIndicator size="small" color="#2563eb" />
-            <Text style={{ marginLeft: 8, color: isDark ? '#60a5fa' : '#2563eb', fontSize: 12, fontWeight: '700' }}>Buscando...</Text>
+            <Text className="ml-2 text-blue-600 dark:text-blue-400 text-xs font-bold">Buscando na área...</Text>
+        </View>
+      )}
+      
+      {map.isZoomedOut && (
+        <View className="absolute top-48 self-center bg-gray-800/90 px-4 py-2 rounded-full shadow-md z-40">
+            <Text className="text-white font-bold text-xs">Aproxime para ver locais</Text>
         </View>
       )}
 
       <TouchableOpacity 
-        style={[styles.recenterBtn, isDark && { backgroundColor: '#1f2937' }]}
+        className="absolute bottom-8 right-6 bg-white dark:bg-gray-800 p-4 rounded-full shadow-lg items-center justify-center active:bg-gray-100 dark:active:bg-gray-700"
         onPress={map.recenterMap}
       >
         <MaterialIcons name="my-location" size={28} color="#2563eb" />
@@ -142,40 +149,5 @@ const TelaMapa = ({ navigation }: TelaMapaProps) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ffffff' },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' },
-  
-  searchingBox: {
-    position: 'absolute',
-    top: 48,
-    alignSelf: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    elevation: 4,
-    flexDirection: 'row',
-    alignItems: 'center',
-    zIndex: 40,
-  },
-
-  recenterBtn: {
-    position: 'absolute',
-    right: 24,
-    bottom: 32,
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 999,
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    elevation: 6,
-    alignItems: 'center',
-    justifyContent: 'center'
-  }
-});
 
 export default TelaMapa;

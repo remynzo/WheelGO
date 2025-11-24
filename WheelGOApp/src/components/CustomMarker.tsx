@@ -1,6 +1,5 @@
-// WheelGOApp/src/components/CustomMarker.tsx
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Dimensions, PixelRatio, Platform } from 'react-native';
+import { View, Dimensions, PixelRatio, Platform } from 'react-native';
 import { Marker } from 'react-native-maps';
 import { FontAwesome5 } from '@expo/vector-icons';
 
@@ -12,7 +11,6 @@ interface Props {
   iconName: string;
   onPress: (place: any) => void;
 }
-
 
 const calcMarkerProps = () => {
   const base = Math.max(30, Math.min(48, Math.round(SCREEN_WIDTH * 0.08)));
@@ -35,7 +33,7 @@ const CustomMarker = ({ place, icon, iconName, onPress }: Props) => {
     return () => clearTimeout(t);
   }, [place]);
 
-  // Estilos dinâmicos baseados no cálculo
+  // Estilos dinâmicos (precisam ser inline pois dependem de cálculo matemático)
   const dynamicOuter = {
     padding: shadowPad,
     borderRadius: Math.ceil((iconSize + shadowPad * 2) / 2),
@@ -53,6 +51,7 @@ const CustomMarker = ({ place, icon, iconName, onPress }: Props) => {
     borderWidth: Math.max(0.8, Math.round(iconSize * 0.03)),
     borderColor: '#fff',
     backgroundColor: icon.color,
+    // Sombras leves para o NativeWind não bugar o render nativo
     shadowColor: '#000',
     shadowOpacity: 0.09,
     shadowOffset: { width: 0, height: 0.6 },
@@ -67,7 +66,7 @@ const CustomMarker = ({ place, icon, iconName, onPress }: Props) => {
         longitude: place.geometry.location.lng,
       }}
       onPress={() => onPress(place)}
-      anchor={{ x: 0.5, y: anchorY }}
+      anchor={{ x: 0.5, y: anchorY }} // A Mágica que impede o corte
       zIndex={1000}
       tracksViewChanges={tracks}
     >
